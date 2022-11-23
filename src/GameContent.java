@@ -1,4 +1,5 @@
 import java.sql.SQLOutput;
+import java.util.Arrays;
 import java.util.Random;
 
 public class GameContent {
@@ -12,11 +13,23 @@ public class GameContent {
 
     int[][] gameMatrix = new int[FIELD_HEIGHT][FIELD_WIDTH];
 
+
     public static void main(String[] args) {
         GameContent gameContent = new GameContent();
+        gameContent.fillTheGameMatrix();
         gameContent.generateMines();
+        gameContent.placeNumberOfMines();
+        gameContent.clearExtraNumbers();
         gameContent.checkMinesInConcole();
 
+    }
+
+    void fillTheGameMatrix() {
+        for (int y = 0; y < FIELD_HEIGHT; y++) {
+            for (int x = 0; x < FIELD_WIDTH; x++) {
+                gameMatrix[y][x]=0;
+            }
+        }
     }
 
     void generateMines() {
@@ -36,18 +49,91 @@ public class GameContent {
         }
 
     }
+
+    void clearExtraNumbers() {
+        for (int y = 0; y < FIELD_HEIGHT; y++) {
+            for (int x = 0; x < FIELD_WIDTH; x++) {
+                if (gameMatrix[y][x]>=9) {
+                    gameMatrix[y][x]=9;
+                }
+            }
+        }
+    }
+
+    void placeNumberOfMines() {
+        for (int y = 0; y < FIELD_HEIGHT; y++) {
+            for (int x = 0; x < FIELD_WIDTH; x++) {
+                if (gameMatrix[y][x]>=9) {
+                    if (y==0&&x==0) {
+                        gameMatrix[0][1]+=1;
+                        gameMatrix[1][0]+=1;
+                        gameMatrix[1][1]+=1;
+                    }
+                    else if (y==0&&(x>0)&&(x<FIELD_WIDTH-1)) {
+                        gameMatrix[0][x-1]+=1;
+                        gameMatrix[0][x+1]+=1;
+                        for (int k = x-1; k < x+2; k++) {
+                            gameMatrix[y+1][k]+=1;
+                        }
+                    }
+                    else if (y==0&&x==FIELD_WIDTH - 1) {
+                        gameMatrix[0][FIELD_WIDTH-2]+=1;
+                        gameMatrix[1][FIELD_WIDTH-2]+=1;
+                        gameMatrix[1][FIELD_WIDTH-1]+=1;
+                    }
+
+                    else if (y==FIELD_HEIGHT-1&&x==0) {
+                        gameMatrix[FIELD_HEIGHT-2][0]+=1;
+                        gameMatrix[FIELD_HEIGHT-2][1]+=1;
+                        gameMatrix[FIELD_HEIGHT-1][1]+=1;
+                    }
+                    else if (y==FIELD_HEIGHT-1&&(x>0)&&(x<FIELD_WIDTH-1)) {
+                        gameMatrix[FIELD_HEIGHT-1][x-1]+=1;
+                        gameMatrix[FIELD_HEIGHT-1][x+1]+=1;
+                        for (int k = x-1; k < x+2; k++) {
+                            gameMatrix[FIELD_HEIGHT-2][k]+=1;
+                        }
+                    }
+
+                    else if (y==FIELD_HEIGHT-1&&x==FIELD_WIDTH-1) {
+                        gameMatrix[FIELD_HEIGHT-2][FIELD_WIDTH-1]+=1;
+                        gameMatrix[FIELD_HEIGHT-2][FIELD_WIDTH-2]+=1;
+                        gameMatrix[FIELD_HEIGHT-1][FIELD_WIDTH-2]+=1;
+                    }
+                    else if (x==0&&(y>0)&&(y<FIELD_HEIGHT-1)) {
+                        gameMatrix[y+1][0]+=1;
+                        gameMatrix[y-1][0]+=1;
+                        for (int k = y-1; k < y+2; k++) {
+                            gameMatrix[k][x+1]=+1;
+                        }
+                    }
+                    else if (x==FIELD_WIDTH-1&&(y>0)&&(y<FIELD_HEIGHT-1)) {
+                        gameMatrix[y+1][FIELD_WIDTH-1]+=1;
+                        gameMatrix[y-1][FIELD_WIDTH-1]+=1;
+                        for (int k = y-1; k < y+2; k++) {
+                            gameMatrix[k][x-1]+=1;
+                        }
+                    }
+                    else {
+                        for (int j = y-1; j < y+2; j++) {
+                            for (int k = x-1; k < x+2; k++) {
+                                gameMatrix[j][k]+=1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void checkMinesInConcole() {
         for (int y = 0; y < FIELD_HEIGHT; y++) {
             for (int x = 0; x < FIELD_WIDTH; x++) {
-                if (gameMatrix[y][x]==9) {
-                    System.out.print("9");
-                    checkMines++;
-                }
-                else System.out.print("0");
+                System.out.print(gameMatrix[y][x]);
             }
             System.out.println();
         }
-        System.out.println("число мин: "+ checkMines);
+
     }
 
 }
