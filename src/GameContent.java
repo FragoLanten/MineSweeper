@@ -1,3 +1,7 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Random;
@@ -7,11 +11,21 @@ public class GameContent {
     final int FIELD_HEIGHT = 15;
     final int FIELD_WIDTH = 15;
     final int BLOCK_SIZE = 20;
+    final int WINDOW_BORDERX=15;
+    final int WINDOW_BORDERY=39;
+
     int currentCountOfMines = 0;
     int countOfMines = 25;
     int checkMines=0;
 
     int[][] gameMatrix = new int[FIELD_HEIGHT][FIELD_WIDTH];
+    boolean[][] verificationMatrix = new boolean[FIELD_HEIGHT][FIELD_WIDTH];
+
+    JFrame frame = new JFrame();
+    DrawPane drawPane = new DrawPane();
+
+    public Image image1;
+
 
 
     public static void main(String[] args) {
@@ -21,6 +35,23 @@ public class GameContent {
         gameContent.placeNumberOfMines();
         gameContent.clearExtraNumbers();
         gameContent.checkMinesInConcole();
+        gameContent.frameInitialization();
+    }
+
+    void frameInitialization () {
+        frame.setTitle("Game MineSweeper");
+        frame.setLocation(300,300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(FIELD_WIDTH*BLOCK_SIZE + WINDOW_BORDERX, FIELD_HEIGHT*BLOCK_SIZE + WINDOW_BORDERY);
+        frame.add(drawPane);
+        frame.setVisible(true);
+
+
+    }
+
+    public void loadImages() {
+        ImageIcon icon1 = new ImageIcon("src/images/1.png");
+        image1 = icon1.getImage();
 
     }
 
@@ -134,6 +165,66 @@ public class GameContent {
             System.out.println();
         }
 
+    }
+
+    public class DrawPane extends JPanel implements MouseListener {
+
+        int mouseX;
+        int mouseY;
+
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            g.setColor(Color.DARK_GRAY);
+            g.drawLine(0,0,FIELD_WIDTH*BLOCK_SIZE,0);
+            for (int y = 0; y < FIELD_HEIGHT; y++) {
+                for (int x = 0; x < FIELD_WIDTH; x++) {
+                    if (verificationMatrix[y][x]==false) {
+                        g.setColor(Color.WHITE);
+                        g.fill3DRect(x*BLOCK_SIZE,y*BLOCK_SIZE+1,BLOCK_SIZE, BLOCK_SIZE,true);
+
+                    }
+                    if (verificationMatrix[y][x]==true&&gameMatrix[y][x]==1) {
+                        g.drawImage(image1,x*BLOCK_SIZE,y*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE,this);
+                    }
+                }
+            }
+        }
+
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            for (int y = 0; y < FIELD_HEIGHT; y++) {
+                for (int x = 0; x < FIELD_WIDTH; x++) {
+                    if (verificationMatrix[mouseX*BLOCK_SIZE][mouseY*BLOCK_SIZE]==false) {
+                        verificationMatrix[mouseX*BLOCK_SIZE][mouseY*BLOCK_SIZE]=true;
+                    }
+                }
+            }
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
     }
 
 }
