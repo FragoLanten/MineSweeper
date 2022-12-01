@@ -23,6 +23,7 @@ public class GameContent extends JPanel {
     final int COVERED_MINE_CELL = 19;
     final int MARKED_MINE_CELL = 29;
 
+    final int DRAW_MINE = 9;
     final int DRAW_COVER = 10;
     final int DRAW_MARK = 11;
     final int DRAW_WRONG_MARK=12;
@@ -40,6 +41,7 @@ public class GameContent extends JPanel {
     public void initGame() {
 
         loadImages();
+        fillTheGameMatrix();
         generateMines();
         placeNumbersAroundMines();
 
@@ -150,22 +152,41 @@ public class GameContent extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+
 
         for (int y = 0; y < FIELD_HEIGHT; y++) {
             for (int x = 0; x < FIELD_WIDTH; x++) {
                 int cell = gameMatrix[y][x];
+                System.out.print(gameMatrix[y][x]);
 
-                if (cell > COVERED_MINE_CELL) {
-                    cell = DRAW_MARK;
-                } else if (cell > MINE_CELL) {
-                    cell = DRAW_COVER;
+                if (inGame && cell == MINE_CELL) {
+
+                    inGame = false;
                 }
 
                 if (inGame) {
-                    g.drawImage(img[cell], x*BLOCK_SIZE, y*BLOCK_SIZE, this);
+                    if (cell > COVERED_MINE_CELL) {
+                        cell = DRAW_MARK;
+                    } else if (cell > MINE_CELL) {
+                        cell = DRAW_COVER;
+                    }
                 }
+
+                else    {
+                    if (cell == COVERED_MINE_CELL) {
+                    cell = DRAW_MINE;
+                    } else if (cell == MARKED_MINE_CELL) {
+                    cell = DRAW_MARK;
+                    } else if (cell > COVERED_MINE_CELL) {
+                    cell = DRAW_WRONG_MARK;
+                    } else if (cell > MINE_CELL) {
+                    cell = DRAW_COVER;
+                    }
+                }
+
+                g.drawImage(img[cell], x * BLOCK_SIZE, y * BLOCK_SIZE, this);
             }
+            System.out.println();
         }
 
     }
