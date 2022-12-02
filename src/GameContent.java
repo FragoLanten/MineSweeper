@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLOutput;
@@ -14,7 +15,7 @@ public class GameContent extends JPanel {
     final static int WINDOW_BORDERX=15;
     final static int WINDOW_BORDERY=39;
 
-    final int countOfMines = 35;
+    final int countOfMines = 40;
 
     final int COVERED_CELL = 10;
     final int EMPTY_CELL = 0;
@@ -44,9 +45,19 @@ public class GameContent extends JPanel {
         fillTheGameMatrix();
         generateMines();
         placeNumbersAroundMines();
-
+        addMouseListener(new MouseListener());
+        checkMines();
     }
-  
+
+    private void checkMines() {
+        for (int y = 0; y < FIELD_HEIGHT; y++) {
+            for (int x = 0; x < FIELD_WIDTH; x++) {
+                System.out.print(gameMatrix[y][x] + ",");
+            }
+            System.out.println();
+        }
+    }
+
     public void loadImages() {
         for (int i = 0; i < 12; i++) {
             var path = "src/images/" + i + ".png";
@@ -128,12 +139,12 @@ public class GameContent extends JPanel {
                         if (gameMatrix[y+1][0]!=COVERED_MINE_CELL) gameMatrix[y+1][0]+=1;
                         if (gameMatrix[y-1][0]!=COVERED_MINE_CELL) gameMatrix[y-1][0]+=1;
                         for (int k = y-1; k < y+2; k++) {
-                            if (gameMatrix[k][x+1]!=COVERED_MINE_CELL) gameMatrix[k][x+1]=+1;
+                            if (gameMatrix[k][x+1]!=COVERED_MINE_CELL) gameMatrix[k][x+1]+=1;
                         }
                     }
                     else if (x==FIELD_WIDTH-1&&(y>0)&&(y<FIELD_HEIGHT-1)) {
                         if (gameMatrix[y+1][FIELD_WIDTH-1]!=COVERED_MINE_CELL) gameMatrix[y+1][FIELD_WIDTH-1]+=1;
-                        if (gameMatrix[y+1][FIELD_WIDTH-1]!=COVERED_MINE_CELL) gameMatrix[y-1][FIELD_WIDTH-1]+=1;
+                        if (gameMatrix[y-1][FIELD_WIDTH-1]!=COVERED_MINE_CELL) gameMatrix[y-1][FIELD_WIDTH-1]+=1;
                         for (int k = y-1; k < y+2; k++) {
                             if (gameMatrix[k][x-1]!=COVERED_MINE_CELL) gameMatrix[k][x-1]+=1;
                         }
@@ -150,6 +161,24 @@ public class GameContent extends JPanel {
         }
     }
 
+    public void findEmptyCells(int y, int x) {
+        for (int i = y-1; i < y+2; i++) {
+            for (int j = x-1; j < x+2; j++) {
+                if ((i>=0&&i<FIELD_HEIGHT)&&(j>=0&&j<FIELD_WIDTH)) {
+                    if(gameMatrix[i][j]>MINE_CELL&&gameMatrix[i][j]<COVERED_MINE_CELL) {
+                        gameMatrix[i][j]-=COVERED_CELL;
+                        if (gameMatrix[i][j]==EMPTY_CELL) {
+                            findEmptyCells(i,j);
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
 
@@ -157,7 +186,7 @@ public class GameContent extends JPanel {
         for (int y = 0; y < FIELD_HEIGHT; y++) {
             for (int x = 0; x < FIELD_WIDTH; x++) {
                 int cell = gameMatrix[y][x];
-                System.out.print(gameMatrix[y][x]);
+
 
                 if (inGame && cell == MINE_CELL) {
 
@@ -186,8 +215,49 @@ public class GameContent extends JPanel {
 
                 g.drawImage(img[cell], x * BLOCK_SIZE, y * BLOCK_SIZE, this);
             }
-            System.out.println();
+
         }
 
+    }
+
+    public class MouseListener extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+            boolean doRepaint = false;
+
+            int x = e.getX()/BLOCK_SIZE;
+            int y = e.getY()/BLOCK_SIZE;
+
+            if (y<FIELD_WIDTH*BLOCK_SIZE&&x<FIELD_WIDTH*BLOCK_SIZE) {
+                if (e.getButton()==MouseEvent.BUTTON1) {
+                    if (gameMatrix[y][x]>MINE_CELL&&gameMatrix[y][x]<MARKED_MINE_CELL) {
+                        gameMatrix[y][x]=gameMatrix[y][x]-COVERED_CELL;
+                        doRepaint = true;
+                    }
+                    if (gameMatrix[y][x]==COVERED_MINE_CELL) {
+                        inGame = false;
+                    }
+                    if (gameMatrix[y][x]==EMPTY_CELL) {
+                        findEmptyCells(y,x);
+                    }
+                }
+                else if (e.getButton()==MouseEvent.BUTTON3) {
+                    doRepaint = true;
+                    if (gameMatrix[y][x]<=COVERED_MINE_CELL) {
+                        gameMatrix[y][x]+=MARKED_CELL;
+                    }
+                    else {
+                        gameMatrix[y][x]-=MARKED_CELL;
+                    }
+                }
+
+            }
+            if (doRepaint) {
+                repaint();
+            }
+
+
+        }
     }
 }
